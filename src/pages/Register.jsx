@@ -94,10 +94,6 @@ export default function Register() {
       background: 'linear-gradient(135deg, #0f1e3d 0%, #1a2e5a 60%, #2d4a8a 100%)',
       padding: '20px',
     }}>
-      <button onClick={() => navigate('/login')}
-        style={{ position: 'absolute', top: '20px', left: '20px', background: 'rgba(255,255,255,0.15)', border: 'none', color: 'white', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
-        ← Back
-        </button>
 
       <div style={{
         background: 'white', borderRadius: '24px', width: '100%', maxWidth: '460px',
@@ -261,6 +257,13 @@ export default function Register() {
               <UserPlus size={18} />
               {loading ? 'Creating Account...' : 'Create Account & Sign In'}
             </button>
+
+            <div style={{ borderTop: '1px solid #e5e7eb', marginTop: '4px', paddingTop: '12px', paddingBottom: '8px' }}>
+              <button onClick={() => navigate('/login')}
+                style={{ width: '100%', padding: '10px', background: 'transparent', border: 'none', cursor: 'pointer', color: '#6b7280', fontWeight: '600', fontSize: '0.875rem' }}>
+                ← Back to Sign In
+              </button>
+            </div>
           </form>
 
           <p style={{ textAlign: 'center', marginTop: '18px', color: '#6b7280', fontSize: '0.875rem' }}>

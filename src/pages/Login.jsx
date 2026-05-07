@@ -40,7 +40,7 @@ export default function Login() {
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'linear-gradient(135deg, #0f1e3d 0%, #1a2e5a 60%, #2d4a8a 100%)',
-      padding: '20px', position: 'relative'
+      padding: '20px'
     }}>
 
       <div style={{
