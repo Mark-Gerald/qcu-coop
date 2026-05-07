@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useAuth } from './context/AuthContext';
+import PageLoader from './components/PageLoader';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
 import Cart from './pages/Cart';
@@ -72,6 +73,7 @@ function AppContent() {
 export default function App() {
   return (
     <Router>
+      <PageLoader />
       <AppContent />
     </Router>
   );
