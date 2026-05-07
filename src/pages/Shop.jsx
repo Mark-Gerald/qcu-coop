@@ -149,7 +149,7 @@ export default function Shop({ cart, setCart }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {filtered.map(product => {
                   const badge = categoryBadgeColor[product.category] || { bg: '#6b7280', text: 'white' };
-                  const outOfStock = product.stock === 0;
+                  const outOfStock = product.stock <= 0;
                   return (
                     <div key={product._id} style={{
                       background: 'white', borderRadius: '16px', overflow: 'hidden',

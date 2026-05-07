@@ -125,7 +125,7 @@ export default function AdminProducts() {
                   }}>
                     {p.category}
                   </span>
-                  {p.stock === 0 && (
+                  {p.stock <= 0 && (
                     <span style={{ position: 'absolute', top: '8px', right: '8px', background: '#ef4444', color: 'white', padding: '2px 8px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: '600' }}>
                       Out of Stock
                     </span>
