@@ -206,17 +206,19 @@ export default function Cart({ cart, setCart }) {
               </div>
 
               {/* Order Summary */}
-              <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 8px rgba(0,0,0,0.06)', height: 'fit-content' }}>
+              <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 8px rgba(0,0,0,0.06)', height: 'fit-content', position: 'sticky', top: '80px', }}>
                 <h3 style={{ color: '#1a2e5a', fontWeight: '700', marginBottom: '20px', fontSize: '1.1rem' }}>Order Summary</h3>
 
-                {cart.map(item => (
-                  <div key={item._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: '0.875rem' }}>
-                    <span style={{ color: '#374151' }}>{item.name} ×{item.quantity}</span>
-                    <span style={{ color: '#1a2e5a', fontWeight: '600' }}>₱{(item.price * item.quantity).toFixed(2)}</span>
-                  </div>
-                ))}
+                <div style={{ maxHeight: '240px', overflowY: 'auto', marginBottom: '12px', paddingRight: '4px' }}>
+                  {cart.map(item => (
+                    <div key={item._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: '0.875rem' }}>
+                      <span style={{ color: '#374151', marginRight: '8px' }}>{item.name} ×{item.quantity}</span>
+                      <span style={{ color: '#1a2e5a', fontWeight: '600', flexShrink: 0 }}>₱{(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
 
-                <div style={{ borderTop: '2px solid #e5e7eb', marginTop: '12px', paddingTop: '12px', display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ borderTop: '2px solid #e5e7eb', paddingTop: '12px', display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ fontWeight: '700', color: '#0f172a' }}>Total</span>
                   <span style={{ fontWeight: '800', color: '#1a2e5a', fontSize: '1.2rem' }}>₱{total.toFixed(2)}</span>
                 </div>

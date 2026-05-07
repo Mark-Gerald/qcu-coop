@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { getProducts } from '../api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Toast from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
 import { Search, ShoppingCart, Eye, Package } from 'lucide-react';
 
@@ -16,6 +17,7 @@ export default function Shop({ cart, setCart }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [toast, setToast] = useState({ visible: false, message: '' });
 
   useEffect(() => {
     const cat = searchParams.get('category') || '';
@@ -45,9 +47,11 @@ export default function Shop({ cart, setCart }) {
             ? { ...i, quantity: Math.min(i.quantity + qty, product.stock) }
             : i)
         : [...prev, { ...product, quantity: qty }];
-      localStorage.setItem('cart', JSON.stringify(updated));
+      localStorage.setItem(`cart_${user.student_id}`, JSON.stringify(updated));
       return updated;
     });
+    // Show toast
+    setToast({ visible: true, message: `Added ${qty}× ${product.name} to cart` });
     setSelectedProduct(null);
     setQuantity(1);
   };
@@ -297,6 +301,12 @@ export default function Shop({ cart, setCart }) {
       )}
 
       <Footer />
+
+      <Toast
+        message={toast.message}
+        visible={toast.visible}
+        onHide={() => setToast({ ...toast, visible: false })}
+      />
     </div>
   );
 }
