@@ -9,9 +9,12 @@ API.interceptors.request.use(req => {
   return req;
 });
 
+// Create a PUBLIC API instance WITHOUT token interceptor (for login verification)
+const PUBLIC_API = axios.create({ baseURL: 'https://qcu-coop-api.onrender.com/api' });
+
 // AUTH
 export const registerUser  = (data) => API.post('/auth/register', data);
-export const loginUser     = (data) => API.post('/auth/login', data);
+export const loginUser     = (data) => PUBLIC_API.post('/auth/login', data); // Use PUBLIC_API
 export const getMe         = ()     => API.get('/auth/me');
 
 // PRODUCTS
