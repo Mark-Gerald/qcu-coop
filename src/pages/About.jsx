@@ -1,6 +1,7 @@
+import { useState } from 'react';
+import { Award, Heart, Users, Target, BookOpen, Tag } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { Target, Heart, Award, Users, BookOpen, Tag } from 'lucide-react';
 
 export default function About() {
   const values = [
@@ -14,6 +15,12 @@ export default function About() {
     { icon: <span style={{ fontSize: '2rem' }}>👕</span>, title: 'Uniforms', desc: 'Official QCU uniforms, PE attire, and department-specific clothing at competitive prices.' },
     { icon: <BookOpen size={32} style={{ color: '#22c55e' }} />, title: 'School Supplies', desc: 'Notebooks, pens, folders, art materials, and all academic essentials.' },
     { icon: <Tag size={32} style={{ color: '#f5c518' }} />, title: 'ID & Lanyards', desc: 'ID card holders, lanyards, and personalized accessories for QCU students.' },
+  ];
+
+  const partners = [
+    { name: 'Logo 1', image: '/logo1.png' },
+    { name: 'Logo 2', image: '/logo2.png' },
+    { name: 'Logo 3', image: '/logo3.png' },
   ];
 
   return (
@@ -54,73 +61,81 @@ export default function About() {
               icon: <Heart size={28} style={{ color: 'white' }} />,
               iconBg: '#f5c518',
               title: 'Our Vision',
-              text: 'To be the leading student cooperative in Metro Manila, recognized for excellence in service, integrity in operations, and commitment to the welfare of the QCU academic community.',
+              text: 'To become the trusted go-to destination for all student needs at QCU, known for quality, affordability, and outstanding customer service.',
             },
-          ].map(card => (
-            <div key={card.title} style={{
-              background: 'white', borderRadius: '16px', padding: '32px',
-              boxShadow: '0 2px 16px rgba(0,0,0,0.07)', border: '1px solid #f0f0f0',
-            }}>
-              <div style={{
-                width: '52px', height: '52px', borderRadius: '12px',
-                background: card.iconBg, display: 'flex', alignItems: 'center',
-                justifyContent: 'center', marginBottom: '20px',
-              }}>
-                {card.icon}
+          ].map(sec => (
+            <div key={sec.title} style={{ padding: '32px', background: 'white', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+              <div style={{ width: '56px', height: '56px', background: sec.iconBg, borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+                {sec.icon}
               </div>
-              <h3 style={{ color: '#1a2e5a', fontWeight: '700', fontSize: '1.25rem', marginBottom: '12px' }}>
-                {card.title}
-              </h3>
-              <p style={{ color: '#6b7280', lineHeight: '1.7', fontSize: '0.95rem' }}>{card.text}</p>
+              <h3 style={{ color: '#1a2e5a', fontWeight: '700', fontSize: '1.375rem', marginBottom: '12px' }}>{sec.title}</h3>
+              <p style={{ color: '#6b7280', lineHeight: '1.7', margin: 0 }}>{sec.text}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* What We Offer */}
-      <section style={{ background: '#f8f9fa', padding: '64px 20px' }}>
+      {/* Core Values */}
+      <section style={{ background: '#f8fafc', padding: '60px 20px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <h2 style={{ textAlign: 'center', color: '#1a2e5a', fontWeight: '800', fontSize: '1.875rem', marginBottom: '40px' }}>
-            What We Offer
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {offerings.map(item => (
-              <div key={item.title} style={{
-                background: 'white', borderRadius: '16px', padding: '32px',
-                textAlign: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-              }}>
-                <div style={{ marginBottom: '16px' }}>{item.icon}</div>
-                <h3 style={{ color: '#1a2e5a', fontWeight: '700', marginBottom: '10px' }}>{item.title}</h3>
-                <p style={{ color: '#6b7280', fontSize: '0.875rem', lineHeight: '1.6' }}>{item.desc}</p>
+          <h2 style={{ color: '#1a2e5a', fontWeight: '800', fontSize: '1.875rem', textAlign: 'center', marginBottom: '12px' }}>Our Core Values</h2>
+          <p style={{ color: '#6b7280', textAlign: 'center', marginBottom: '40px' }}>The principles guiding every decision we make</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {values.map(v => (
+              <div key={v.label} style={{ background: v.bg, padding: '24px 16px', borderRadius: '16px', textAlign: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>{v.icon}</div>
+                <p style={{ color: '#1a2e5a', fontWeight: '700', margin: 0 }}>{v.label}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Campus Photo */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-        <div style={{ borderRadius: '20px', overflow: 'hidden', maxHeight: '300px' }}>
-          <img src="/QCU_shots_2.png" alt="QCU Campus"
-            style={{ width: '100%', height: '300px', objectFit: 'cover', objectPosition: 'center 60%' }}
-            onError={e => { e.target.style.display = 'none'; }} />
+      {/* What We Offer */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
+        <h2 style={{ color: '#1a2e5a', fontWeight: '800', fontSize: '1.875rem', textAlign: 'center', marginBottom: '40px' }}>What We Offer</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {offerings.map(offer => (
+            <div key={offer.title} style={{ background: 'white', padding: '32px 24px', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)', textAlign: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>{offer.icon}</div>
+              <h3 style={{ color: '#1a2e5a', fontWeight: '700', fontSize: '1.125rem', marginBottom: '8px' }}>{offer.title}</h3>
+              <p style={{ color: '#6b7280', fontSize: '0.9rem', lineHeight: '1.6', margin: 0 }}>{offer.desc}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Core Values */}
-      <section style={{ background: '#f8f9fa', padding: '64px 20px' }}>
+      {/* Partners/Logos - NOW PERFECTLY CENTERED */}
+      <section style={{ background: '#f8fafc', padding: '60px 20px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <h2 style={{ textAlign: 'center', color: '#1a2e5a', fontWeight: '800', fontSize: '1.875rem', marginBottom: '40px' }}>
-            Our Core Values
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {values.map(v => (
-              <div key={v.label} style={{
-                background: v.bg, borderRadius: '16px', padding: '28px 16px',
-                textAlign: 'center', border: '1px solid rgba(0,0,0,0.05)',
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>{v.icon}</div>
-                <p style={{ color: '#1a2e5a', fontWeight: '600', fontSize: '0.95rem' }}>{v.label}</p>
+          <h2 style={{ color: '#1a2e5a', fontWeight: '800', fontSize: '1.875rem', textAlign: 'center', marginBottom: '12px' }}>Our Partners</h2>
+          <p style={{ color: '#6b7280', textAlign: 'center', marginBottom: '40px' }}>Trusted by leading organizations</p>
+          
+          {/* FIX: Grid with perfect centering */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {partners.map(partner => (
+              <div key={partner.name} 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '24px 16px',
+                  background: 'white',
+                  borderRadius: '12px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                  minHeight: '140px',
+                  aspectRatio: '1',
+                }}>
+                <img 
+                  src={partner.image} 
+                  alt={partner.name}
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '100%',
+                    objectFit: 'contain',
+                  }}
+                  onError={e => { e.target.style.display = 'none'; }}
+                />
               </div>
             ))}
           </div>
