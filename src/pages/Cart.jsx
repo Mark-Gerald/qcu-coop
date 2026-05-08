@@ -18,18 +18,36 @@ export default function Cart({ cart, setCart }) {
   const [confirmError, setConfirmError] = useState('');
   const [confirmLoading, setConfirmLoading] = useState(false);
 
-  const updateQty = (id, qty) => {
-    const updated = qty < 1
-      ? cart.filter(i => i._id !== id)
-      : cart.map(i => i._id === id ? { ...i, quantity: qty } : i);
+  const updateQty = (id, newQty) => {
+    const item = cart.find(i => i._id === id);
+    if (!item) return;
+
+    // Get the maximum allowed quantity (product stock)
+    const maxAllowed = item.stock;
+
+    // Clamp the new quantity to not exceed stock
+    const validQty = Math.max(0, Math.min(newQty, maxAllowed));
+
+    if (validQty === 0) {
+      // Remove item if quantity becomes 0
+      removeItem(id);
+      return;
+    }
+
+    // If user tried to exceed stock, show them the limitation
+    if (newQty > maxAllowed) {
+      alert(`⚠️ Cannot exceed available stock. Maximum available: ${maxAllowed} units.`);
+    }
+
+    const updated = cart.map(i => i._id === id ? { ...i, quantity: validQty } : i);
     setCart(updated);
-    localStorage.setItem('cart', JSON.stringify(updated));
+    localStorage.setItem(`cart_${user?.student_id || 'guest'}`, JSON.stringify(updated));
   };
 
   const removeItem = (id) => {
     const updated = cart.filter(i => i._id !== id);
     setCart(updated);
-    localStorage.setItem('cart', JSON.stringify(updated));
+    localStorage.setItem(`cart_${user?.student_id || 'guest'}`, JSON.stringify(updated));
   };
 
   const total = cart.reduce((s, i) => s + i.price * i.quantity, 0);
