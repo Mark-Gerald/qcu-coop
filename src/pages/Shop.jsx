@@ -40,6 +40,26 @@ export default function Shop({ cart, setCart }) {
 
   const addToCart = (product, qty = 1) => {
     if (!user) { navigate('/login'); return; }
+
+    // CHECK: Is there any stock available?
+    const totalQuantityInCart = cart.reduce((sum, item) => 
+      item._id === product._id ? sum + qty : sum, 0
+    );
+    const availableStock = product.stock - (cart.find(i => i._id === product._id)?.quantity || 0);
+    
+    if (availableStock <= 0) {
+      // NO STOCK - Show error message
+      setToast({ visible: true, message: `Sorry, there is no more stock available for ${product.name} at the moment.`, type: 'error' });
+      return;
+    }
+
+    if (qty > availableStock) {
+      // PARTIAL STOCK - Show warning
+      const maxQty = availableStock;
+      setToast({ visible: true, message: `Only ${maxQty} item${maxQty !== 1 ? 's' : ''} available for ${product.name}.`, type: 'warning' });
+      qty = maxQty;
+    }
+
     setCart(prev => {
       const exists = prev.find(i => i._id === product._id);
       const updated = exists
@@ -51,7 +71,7 @@ export default function Shop({ cart, setCart }) {
       return updated;
     });
     // Show toast
-    setToast({ visible: true, message: `Added ${qty}× ${product.name} to cart` });
+    setToast({ visible: true, message: `Added ${qty}× ${product.name} to cart`, type: 'success' });
     setSelectedProduct(null);
     setQuantity(1);
   };
