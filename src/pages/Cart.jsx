@@ -254,67 +254,65 @@ export default function Cart({ cart, setCart }) {
     }}>
 
       {/* STEP 1 — Order Summary */}
-      {modalStep === 1 && (
-        <div style={{ background: 'white', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.3)' }}>
-          <div style={{ background: '#1a2e5a', padding: '24px 28px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h2 style={{ color: 'white', fontWeight: '800', margin: '0 0 4px', fontSize: '1.2rem' }}>Order Summary</h2>
-                <p style={{ color: '#94a3b8', margin: 0, fontSize: '0.85rem' }}>Review your order before placing</p>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f5c518', fontWeight: '800', fontSize: '0.9rem' }}>
-                1/2
-              </div>
-            </div>
-          </div>
-
-          <div style={{ padding: '24px 28px' }}>
-            {/* Items */}
-            <div style={{ marginBottom: '16px' }}>
-              {cart.map(item => (
-                <div key={item._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ width: '44px', height: '44px', borderRadius: '8px', overflow: 'hidden', background: '#f1f5f9', flexShrink: 0 }}>
-                      <img src={item.image_url || 'https://placehold.co/44x44?text=?'} alt={item.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        onError={e => { e.target.src = 'https://placehold.co/44x44?text=?'; }} />
-                    </div>
-                    <div>
-                      <p style={{ margin: 0, fontWeight: '600', color: '#1a2e5a', fontSize: '0.875rem' }}>{item.name}</p>
-                      <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.78rem' }}>×{item.quantity} @ ₱{item.price}</p>
-                    </div>
-                  </div>
-                  <span style={{ fontWeight: '700', color: '#1a2e5a', fontSize: '0.9rem' }}>
-                    ₱{(item.price * item.quantity).toFixed(2)}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Total */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderTop: '2px solid #e5e7eb', marginBottom: '20px' }}>
-              <span style={{ fontWeight: '800', color: '#0f172a', fontSize: '1rem' }}>Total</span>
-              <span style={{ fontWeight: '800', color: '#1a2e5a', fontSize: '1.2rem' }}>₱{total.toFixed(2)}</span>
-            </div>
-
-            {/* Info note */}
-            <div style={{ background: '#f0f4ff', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', fontSize: '0.8rem', color: '#374151', lineHeight: '1.5' }}>
-              Your order will be sent to the admin for approval. You'll receive an email notification once reviewed.
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button onClick={() => setShowConfirmModal(false)}
-                style={{ flex: 1, padding: '12px', border: '1.5px solid #e5e7eb', borderRadius: '10px', background: 'white', cursor: 'pointer', fontWeight: '600', color: '#64748b' }}>
-                Cancel
-              </button>
-              <button onClick={() => { setConfirmError(''); setModalStep(2); }}
-                style={{ flex: 2, padding: '12px', background: '#f5c518', color: '#1a2e5a', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: '800', fontSize: '0.95rem' }}>
-                Proceed
-              </button>
-            </div>
-          </div>
+{modalStep === 1 && (
+  <div style={{ background: 'white', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.3)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+    {/* Header — fixed */}
+    <div style={{ background: '#1a2e5a', padding: '20px 24px', flexShrink: 0 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ color: 'white', fontWeight: '800', margin: '0 0 2px', fontSize: '1.1rem' }}>Order Summary</h2>
+          <p style={{ color: '#94a3b8', margin: 0, fontSize: '0.8rem' }}>Review your order before placing</p>
         </div>
-      )}
+        <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '50%', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f5c518', fontWeight: '800', fontSize: '0.85rem' }}>
+          1/2
+        </div>
+      </div>
+    </div>
+
+    {/* Scrollable Items */}
+    <div style={{ overflowY: 'auto', padding: '16px 24px', flex: 1 }}>
+      {cart.map(item => (
+        <div key={item._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', background: '#f1f5f9', flexShrink: 0 }}>
+              <img src={item.image_url || 'https://placehold.co/40x40?text=?'} alt={item.name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                onError={e => { e.target.src = 'https://placehold.co/40x40?text=?'; }} />
+            </div>
+            <div>
+              <p style={{ margin: 0, fontWeight: '600', color: '#1a2e5a', fontSize: '0.825rem' }}>{item.name}</p>
+              <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.75rem' }}>×{item.quantity} @ ₱{item.price}</p>
+            </div>
+          </div>
+          <span style={{ fontWeight: '700', color: '#1a2e5a', fontSize: '0.875rem', flexShrink: 0, marginLeft: '8px' }}>
+            ₱{(item.price * item.quantity).toFixed(2)}
+          </span>
+        </div>
+      ))}
+    </div>
+
+    {/* Fixed Bottom — Total + Buttons */}
+    <div style={{ padding: '16px 24px', borderTop: '1px solid #f1f5f9', flexShrink: 0, background: 'white' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '14px' }}>
+        <span style={{ fontWeight: '800', color: '#0f172a', fontSize: '1rem' }}>Total</span>
+        <span style={{ fontWeight: '800', color: '#1a2e5a', fontSize: '1.2rem' }}>₱{total.toFixed(2)}</span>
+      </div>
+      <div style={{ background: '#f0f4ff', borderRadius: '10px', padding: '10px 14px', marginBottom: '14px', fontSize: '0.78rem', color: '#374151', lineHeight: '1.5' }}>
+        Your order will be sent to the admin for approval. You'll receive an email once reviewed.
+      </div>
+      <div style={{ display: 'flex', gap: '10px' }}>
+        <button onClick={() => setShowConfirmModal(false)}
+          style={{ flex: 1, padding: '12px', border: '1.5px solid #e5e7eb', borderRadius: '10px', background: 'white', cursor: 'pointer', fontWeight: '600', color: '#64748b', fontSize: '0.9rem' }}>
+          Cancel
+        </button>
+        <button onClick={() => { setConfirmError(''); setModalStep(2); }}
+          style={{ flex: 2, padding: '12px', background: '#f5c518', color: '#1a2e5a', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: '800', fontSize: '0.9rem' }}>
+          Proceed
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* STEP 2 — Identity Verification */}
       {modalStep === 2 && (
