@@ -17,6 +17,7 @@ export default function Cart({ cart, setCart }) {
   const [confirmForm, setConfirmForm] = useState({ student_id: '', password: '' });
   const [confirmError, setConfirmError] = useState('');
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [toast, setToast] = useState({ visible: false, message: '', type: 'info' });
 
   const updateQty = (id, newQty) => {
     const item = cart.find(i => i._id === id);
@@ -34,15 +35,20 @@ export default function Cart({ cart, setCart }) {
       return;
     }
 
-    // If user tried to exceed stock, show them the limitation
+    // If user tried to exceed stock, show toast instead of alert
     if (newQty > maxAllowed) {
-      alert(`⚠️ Cannot exceed available stock. Maximum available: ${maxAllowed} units.`);
+      setToast({ 
+        visible: true, 
+        message: `Only ${maxAllowed} item${maxAllowed !== 1 ? 's' : ''} available in stock.`,
+        type: 'warning'
+      });
     }
 
     const updated = cart.map(i => i._id === id ? { ...i, quantity: validQty } : i);
     setCart(updated);
     localStorage.setItem(`cart_${user?.student_id || 'guest'}`, JSON.stringify(updated));
   };
+
 
   const removeItem = (id) => {
     const updated = cart.filter(i => i._id !== id);
@@ -64,45 +70,63 @@ export default function Cart({ cart, setCart }) {
 
   // Step 2: User re-enters credentials to confirm identity
   const handleConfirmOrder = async () => {
-    setConfirmError('');
-    setConfirmLoading(true);
+  setConfirmError('');
+  setConfirmLoading(true);
 
-    // Validate credentials match the logged-in user
-    if (confirmForm.student_id !== user.student_id) {
-      setConfirmError('Student ID does not match your logged-in account.');
-      setConfirmLoading(false);
-      return;
-    }
+  // FIX: Validate credentials match the logged-in user
+  if (confirmForm.student_id.trim() !== user.student_id) {
+    setConfirmError('Student ID does not match your logged-in account.');
+    setConfirmLoading(false);
+    return;
+  }
 
-    try {
-      // Re-authenticate to verify password
-      await loginUser({ student_id: confirmForm.student_id, password: confirmForm.password });
+  // FIX: Check that password is not empty
+  if (!confirmForm.password || confirmForm.password.trim() === '') {
+    setConfirmError('Password cannot be empty.');
+    setConfirmLoading(false);
+    return;
+  }
 
-      // Credentials verified — place the order
-      await placeOrder({
-        student_id: user.student_id,
-        student_name: `${user.first_name} ${user.last_name}`,
-        student_email: user.email,
-        items: cart.map(i => ({
-          product_id: i._id,
-          product_name: i.name,
-          price: i.price,
-          quantity: i.quantity,
-          subtotal: i.price * i.quantity,
-        })),
-        total_amount: total,
-      });
+  try {
+    console.log('🔐 Attempting verification with:', {
+      student_id: confirmForm.student_id,
+      password_length: confirmForm.password.length,
+    });
 
-      setCart([]);
-      localStorage.removeItem('cart');
-      setShowConfirmModal(false);
-      setSuccess(true);
-    } catch (err) {
-      setConfirmError('Incorrect password. Please try again.');
-    } finally {
-      setConfirmLoading(false);
-    }
-  };
+    // Re-authenticate to verify password
+    const loginResponse = await loginUser({ 
+      student_id: confirmForm.student_id.trim(), 
+      password: confirmForm.password // Do NOT trim password - it's case/space sensitive!
+    });
+
+    console.log('✅ Login verification successful:', loginResponse.data.user.student_id);
+
+    // Credentials verified — place the order
+    await placeOrder({
+      student_id: user.student_id,
+      student_name: `${user.first_name} ${user.last_name}`,
+      student_email: user.email,
+      items: cart.map(i => ({
+        product_id: i._id,
+        product_name: i.name,
+        price: i.price,
+        quantity: i.quantity,
+        subtotal: i.price * i.quantity,
+      })),
+      total_amount: total,
+    });
+
+    setCart([]);
+    localStorage.removeItem('cart');
+    setShowConfirmModal(false);
+    setSuccess(true);
+  } catch (err) {
+    console.error('❌ Verification error:', err.response?.data || err.message);
+    setConfirmError(err.response?.data?.error || 'Incorrect password. Please try again.');
+  } finally {
+    setConfirmLoading(false);
+  }
+};
 
   // Add this handler inside the Cart component (near the top with other handlers):
   const handleVerifyStudentId = (e) => {
@@ -423,7 +447,12 @@ export default function Cart({ cart, setCart }) {
     </div>
   </>
 )}
-
+        <Toast
+          visible={toast.visible}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ ...toast, visible: false })}
+        />
       <Footer />
     </div>
   );
