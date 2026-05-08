@@ -15,6 +15,7 @@ export default function AdminProducts() {
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [loading, setLoading] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [expandedMobileHeader, setExpandedMobileHeader] = useState(false);
 
   useEffect(() => {
     getProducts().then(res => setProducts(res.data));
@@ -78,32 +79,83 @@ export default function AdminProducts() {
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 16px' }}>
 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px', alignItems: 'center' }}>
   {/* Search */}
-  <div style={{ position: 'relative', flex: 1, minWidth: '200px', maxWidth: '360px' }}>
-    <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
-    <input placeholder="Search products..." value={search} onChange={e => setSearch(e.target.value)}
-      style={{ ...inputStyle, paddingLeft: '36px', background: 'white' }} />
-  </div>
-
-  {/* Category Pills */}
-  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-    {['All', 'Uniforms', 'School Supplies', 'ID & Lanyards'].map(cat => (
-      <button key={cat} onClick={() => setCategoryFilter(cat)}
+  <div style={{ background: 'white', borderBottom: '1px solid #e2e8f0', padding: 'clamp(12px, 3vw, 24px)' }}>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    {/* Mobile: Responsive Header */}
+    <div style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'space-between',
+      gap: '12px',
+      flexWrap: 'wrap'
+    }}>
+      <Link to="/admin" style={{ color: '#64748b', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>
+        <ArrowLeft size={16} /> Dashboard
+      </Link>
+      <h1 style={{ 
+        color: '#1a2e5a', 
+        fontWeight: '800', 
+        fontSize: 'clamp(1rem, 3vw, 1.25rem)', 
+        margin: 0,
+        flex: 1
+      }}>
+        Product Management
+      </h1>
+      <button 
+        onClick={() => { setForm(empty); setEditing(null); setShowForm(true); }}
         style={{
-          padding: '8px 16px', borderRadius: '20px', border: 'none', cursor: 'pointer',
-          fontWeight: '600', fontSize: '0.8rem', transition: 'all 0.2s',
-          background: categoryFilter === cat ? '#1a2e5a' : 'white',
-          color: categoryFilter === cat ? 'white' : '#64748b',
-          boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+          padding: 'clamp(8px, 2vw, 12px) clamp(12px, 2vw, 16px)',
+          background: '#1a2e5a',
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          fontWeight: '600',
+          fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+          whiteSpace: 'nowrap'
         }}>
-        {cat}
-        {cat !== 'All' && (
-          <span style={{ marginLeft: '4px', opacity: 0.7 }}>
-            ({products.filter(p => p.category === cat).length})
-          </span>
-        )}
+        + Add Product
       </button>
-    ))}
+    </div>
+
+    {/* Search & Filter - Stack on mobile, row on desktop */}
+    <div style={{ 
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '12px'
+    }} className="md:flex-row md:gap-4">
+      <input
+        type="text"
+        placeholder="Search products..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{
+          flex: 1,
+          minWidth: '0',
+          padding: 'clamp(8px, 2vw, 12px) clamp(10px, 2vw, 16px)',
+          borderRadius: '8px',
+          border: '1.5px solid #e2e8f0',
+          fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+        }}
+      />
+      <select
+        value={categoryFilter}
+        onChange={(e) => setCategoryFilter(e.target.value)}
+        style={{
+          padding: 'clamp(8px, 2vw, 12px) clamp(10px, 2vw, 16px)',
+          borderRadius: '8px',
+          border: '1.5px solid #e2e8f0',
+          fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+          minWidth: 'clamp(120px, 25%, 150px)',
+        }}>
+        <option value="All">All Categories</option>
+        <option value="Uniforms">Uniforms</option>
+        <option value="School Supplies">School Supplies</option>
+        <option value="ID & Lanyards">ID & Lanyards</option>
+      </select>
+    </div>
   </div>
+</div>
 </div>
 
         {/* Product Grid */}

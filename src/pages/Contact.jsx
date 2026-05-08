@@ -15,13 +15,15 @@ export default function Contact() {
     setLoading(true);
     setError('');
     try {
-      await API.post('/contact', form);
+      // NEW: Send to backend to store in MongoDB
+      await API.post('/feedback', form);
       setSuccess(true);
       setForm({ name: '', email: '', subject: '', message: '' });
-    } catch {
-      // Even if backend isn't set up yet, show success for now
-      setSuccess(true);
-      setForm({ name: '', email: '', subject: '', message: '' });
+      
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => setSuccess(false), 5000);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to send feedback. Please try again.');
     } finally {
       setLoading(false);
     }
