@@ -4,6 +4,7 @@ import { placeOrder, loginUser } from '../api';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Toast from '../components/Toast';
 import { ShoppingCart, Minus, Plus, Trash2, Eye, EyeOff, CheckCircle, ShoppingBag } from 'lucide-react';
 
 export default function Cart({ cart, setCart }) {
@@ -49,7 +50,6 @@ export default function Cart({ cart, setCart }) {
     localStorage.setItem(`cart_${user?.student_id || 'guest'}`, JSON.stringify(updated));
   };
 
-
   const removeItem = (id) => {
     const updated = cart.filter(i => i._id !== id);
     setCart(updated);
@@ -64,73 +64,72 @@ export default function Cart({ cart, setCart }) {
     if (!user) { navigate('/login'); return; }
     setConfirmForm({ student_id: '', password: '' });
     setConfirmError('');
-    setModalStep(1); // always start at step 1
+    setModalStep(1);
     setShowConfirmModal(true);
   };
 
   // Step 2: User re-enters credentials to confirm identity
   const handleConfirmOrder = async () => {
-  setConfirmError('');
-  setConfirmLoading(true);
+    setConfirmError('');
+    setConfirmLoading(true);
 
-  // FIX: Validate credentials match the logged-in user
-  if (confirmForm.student_id.trim() !== user.student_id) {
-    setConfirmError('Student ID does not match your logged-in account.');
-    setConfirmLoading(false);
-    return;
-  }
+    // Validate credentials match the logged-in user
+    if (confirmForm.student_id.trim() !== user.student_id) {
+      setConfirmError('Student ID does not match your logged-in account.');
+      setConfirmLoading(false);
+      return;
+    }
 
-  // FIX: Check that password is not empty
-  if (!confirmForm.password || confirmForm.password.trim() === '') {
-    setConfirmError('Password cannot be empty.');
-    setConfirmLoading(false);
-    return;
-  }
+    // Check that password is not empty
+    if (!confirmForm.password || confirmForm.password.trim() === '') {
+      setConfirmError('Password cannot be empty.');
+      setConfirmLoading(false);
+      return;
+    }
 
-  try {
-    console.log('🔐 Attempting verification with:', {
-      student_id: confirmForm.student_id,
-      password_length: confirmForm.password.length,
-    });
+    try {
+      console.log('🔐 Attempting verification with:', {
+        student_id: confirmForm.student_id,
+        password_length: confirmForm.password.length,
+      });
 
-    // Re-authenticate to verify password
-    const loginResponse = await loginUser({ 
-      student_id: confirmForm.student_id.trim(), 
-      password: confirmForm.password // Do NOT trim password - it's case/space sensitive!
-    });
+      // Re-authenticate to verify password
+      const loginResponse = await loginUser({ 
+        student_id: confirmForm.student_id.trim(), 
+        password: confirmForm.password
+      });
 
-    console.log('✅ Login verification successful:', loginResponse.data.user.student_id);
+      console.log('✅ Login verification successful:', loginResponse.data.user.student_id);
 
-    // Credentials verified — place the order
-    await placeOrder({
-      student_id: user.student_id,
-      student_name: `${user.first_name} ${user.last_name}`,
-      student_email: user.email,
-      items: cart.map(i => ({
-        product_id: i._id,
-        product_name: i.name,
-        price: i.price,
-        quantity: i.quantity,
-        subtotal: i.price * i.quantity,
-      })),
-      total_amount: total,
-    });
+      // Credentials verified — place the order
+      await placeOrder({
+        student_id: user.student_id,
+        student_name: `${user.first_name} ${user.last_name}`,
+        student_email: user.email,
+        items: cart.map(i => ({
+          product_id: i._id,
+          product_name: i.name,
+          price: i.price,
+          quantity: i.quantity,
+          subtotal: i.price * i.quantity,
+        })),
+        total_amount: total,
+      });
 
-    setCart([]);
-    localStorage.removeItem('cart');
-    setShowConfirmModal(false);
-    setSuccess(true);
-  } catch (err) {
-    console.error('❌ Verification error:', err.response?.data || err.message);
-    setConfirmError(err.response?.data?.error || 'Incorrect password. Please try again.');
-  } finally {
-    setConfirmLoading(false);
-  }
-};
+      setCart([]);
+      localStorage.removeItem('cart');
+      setShowConfirmModal(false);
+      setSuccess(true);
+    } catch (err) {
+      console.error('❌ Verification error:', err.response?.data || err.message);
+      setConfirmError(err.response?.data?.error || 'Incorrect password. Please try again.');
+    } finally {
+      setConfirmLoading(false);
+    }
+  };
 
-  // Add this handler inside the Cart component (near the top with other handlers):
   const handleVerifyStudentId = (e) => {
-    let val = e.target.value.replace(/[^0-9]/g, ''); // digits only
+    let val = e.target.value.replace(/[^0-9]/g, '');
     if (val.length > 6) val = val.slice(0, 6);
     if (val.length > 2) val = val.slice(0, 2) + '-' + val.slice(2);
     setConfirmForm({ ...confirmForm, student_id: val });
@@ -248,7 +247,7 @@ export default function Cart({ cart, setCart }) {
               </div>
 
               {/* Order Summary */}
-              <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 8px rgba(0,0,0,0.06)', height: 'fit-content', position: 'sticky', top: '80px', }}>
+              <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 1px 8px rgba(0,0,0,0.06)', height: 'fit-content', position: 'sticky', top: '80px' }}>
                 <h3 style={{ color: '#1a2e5a', fontWeight: '700', marginBottom: '20px', fontSize: '1.1rem' }}>Order Summary</h3>
 
                 <div style={{ maxHeight: '240px', overflowY: 'auto', marginBottom: '12px', paddingRight: '4px' }}>
@@ -285,174 +284,177 @@ export default function Cart({ cart, setCart }) {
 
       {/* Order Confirmation Modal */}
       {showConfirmModal && (
-  <>
-    {/* Backdrop */}
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 998 }}
-      onClick={() => setShowConfirmModal(false)} />
+        <>
+          {/* Backdrop */}
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 998 }}
+            onClick={() => setShowConfirmModal(false)} />
 
-    <div style={{
-      position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-      zIndex: 999, width: '100%', maxWidth: '460px', padding: '0 20px',
-    }}>
+          <div style={{
+            position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+            zIndex: 999, width: '100%', maxWidth: '460px', padding: '0 20px',
+          }}>
 
-      {/* STEP 1 — Order Summary */}
-{modalStep === 1 && (
-  <div style={{ background: 'white', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.3)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
-    {/* Header — fixed */}
-    <div style={{ background: '#1a2e5a', padding: '20px 24px', flexShrink: 0 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h2 style={{ color: 'white', fontWeight: '800', margin: '0 0 2px', fontSize: '1.1rem' }}>Order Summary</h2>
-          <p style={{ color: '#94a3b8', margin: 0, fontSize: '0.8rem' }}>Review your order before placing</p>
-        </div>
-        <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '50%', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f5c518', fontWeight: '800', fontSize: '0.85rem' }}>
-          1/2
-        </div>
-      </div>
-    </div>
+            {/* STEP 1 — Order Summary */}
+            {modalStep === 1 && (
+              <div style={{ background: 'white', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.3)', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
+                {/* Header — fixed */}
+                <div style={{ background: '#1a2e5a', padding: '20px 24px', flexShrink: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <h2 style={{ color: 'white', fontWeight: '800', margin: '0 0 2px', fontSize: '1.1rem' }}>Order Summary</h2>
+                      <p style={{ color: '#94a3b8', margin: 0, fontSize: '0.8rem' }}>Review your order before placing</p>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '50%', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f5c518', fontWeight: '800', fontSize: '0.85rem' }}>
+                      1/2
+                    </div>
+                  </div>
+                </div>
 
-    {/* Scrollable Items */}
-    <div style={{ overflowY: 'auto', padding: '16px 24px', flex: 1 }}>
-      {cart.map(item => (
-        <div key={item._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', background: '#f1f5f9', flexShrink: 0 }}>
-              <img src={item.image_url || 'https://placehold.co/40x40?text=?'} alt={item.name}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                onError={e => { e.target.src = 'https://placehold.co/40x40?text=?'; }} />
-            </div>
-            <div>
-              <p style={{ margin: 0, fontWeight: '600', color: '#1a2e5a', fontSize: '0.825rem' }}>{item.name}</p>
-              <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.75rem' }}>×{item.quantity} @ ₱{item.price}</p>
-            </div>
-          </div>
-          <span style={{ fontWeight: '700', color: '#1a2e5a', fontSize: '0.875rem', flexShrink: 0, marginLeft: '8px' }}>
-            ₱{(item.price * item.quantity).toFixed(2)}
-          </span>
-        </div>
-      ))}
-    </div>
+                {/* Scrollable Items */}
+                <div style={{ overflowY: 'auto', padding: '16px 24px', flex: 1 }}>
+                  {cart.map(item => (
+                    <div key={item._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: '8px', overflow: 'hidden', background: '#f1f5f9', flexShrink: 0 }}>
+                          <img src={item.image_url || 'https://placehold.co/40x40?text=?'} alt={item.name}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            onError={e => { e.target.src = 'https://placehold.co/40x40?text=?'; }} />
+                        </div>
+                        <div>
+                          <p style={{ margin: 0, fontWeight: '600', color: '#1a2e5a', fontSize: '0.825rem' }}>{item.name}</p>
+                          <p style={{ margin: 0, color: '#94a3b8', fontSize: '0.75rem' }}>×{item.quantity} @ ₱{item.price}</p>
+                        </div>
+                      </div>
+                      <span style={{ fontWeight: '700', color: '#1a2e5a', fontSize: '0.875rem', flexShrink: 0, marginLeft: '8px' }}>
+                        ₱{(item.price * item.quantity).toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
 
-    {/* Fixed Bottom — Total + Buttons */}
-    <div style={{ padding: '16px 24px', borderTop: '1px solid #f1f5f9', flexShrink: 0, background: 'white' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '14px' }}>
-        <span style={{ fontWeight: '800', color: '#0f172a', fontSize: '1rem' }}>Total</span>
-        <span style={{ fontWeight: '800', color: '#1a2e5a', fontSize: '1.2rem' }}>₱{total.toFixed(2)}</span>
-      </div>
-      <div style={{ background: '#f0f4ff', borderRadius: '10px', padding: '10px 14px', marginBottom: '14px', fontSize: '0.78rem', color: '#374151', lineHeight: '1.5' }}>
-        Your order will be sent to the admin for approval. You'll receive an email once reviewed.
-      </div>
-      <div style={{ display: 'flex', gap: '10px' }}>
-        <button onClick={() => setShowConfirmModal(false)}
-          style={{ flex: 1, padding: '12px', border: '1.5px solid #e5e7eb', borderRadius: '10px', background: 'white', cursor: 'pointer', fontWeight: '600', color: '#64748b', fontSize: '0.9rem' }}>
-          Cancel
-        </button>
-        <button onClick={() => { setConfirmError(''); setModalStep(2); }}
-          style={{ flex: 2, padding: '12px', background: '#f5c518', color: '#1a2e5a', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: '800', fontSize: '0.9rem' }}>
-          Proceed
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-      {/* STEP 2 — Identity Verification */}
-      {modalStep === 2 && (
-        <div style={{ background: 'white', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.3)' }}>
-          <div style={{ background: '#1a2e5a', padding: '24px 28px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h2 style={{ color: 'white', fontWeight: '800', margin: '0 0 4px', fontSize: '1.2rem' }}>Verify Identity</h2>
-                <p style={{ color: '#94a3b8', margin: 0, fontSize: '0.85rem' }}>Confirm your credentials to place the order</p>
-              </div>
-              <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f5c518', fontWeight: '800', fontSize: '0.9rem' }}>
-                2/2
-              </div>
-            </div>
-          </div>
-
-          <div style={{ padding: '24px 28px' }}>
-            {confirmError && (
-              <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px', color: '#dc2626', fontSize: '0.8rem' }}>
-                {confirmError}
+                {/* Fixed Bottom — Total + Buttons */}
+                <div style={{ padding: '16px 24px', borderTop: '1px solid #f1f5f9', flexShrink: 0, background: 'white' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '14px' }}>
+                    <span style={{ fontWeight: '800', color: '#0f172a', fontSize: '1rem' }}>Total</span>
+                    <span style={{ fontWeight: '800', color: '#1a2e5a', fontSize: '1.2rem' }}>₱{total.toFixed(2)}</span>
+                  </div>
+                  <div style={{ background: '#f0f4ff', borderRadius: '10px', padding: '10px 14px', marginBottom: '14px', fontSize: '0.78rem', color: '#374151', lineHeight: '1.5' }}>
+                    Your order will be sent to the admin for approval. You'll receive an email once reviewed.
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button onClick={() => setShowConfirmModal(false)}
+                      style={{ flex: 1, padding: '12px', border: '1.5px solid #e5e7eb', borderRadius: '10px', background: 'white', cursor: 'pointer', fontWeight: '600', color: '#64748b', fontSize: '0.9rem' }}>
+                      Cancel
+                    </button>
+                    <button onClick={() => { setConfirmError(''); setModalStep(2); }}
+                      style={{ flex: 2, padding: '12px', background: '#f5c518', color: '#1a2e5a', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: '800', fontSize: '0.9rem' }}>
+                      Proceed
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
-            <p style={{ color: '#374151', fontSize: '0.875rem', marginBottom: '20px', lineHeight: '1.5' }}>
-              For your security, please re-enter your login credentials to confirm this order.
-            </p>
+            {/* STEP 2 — Identity Verification */}
+            {modalStep === 2 && (
+              <div style={{ background: 'white', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 24px 60px rgba(0,0,0,0.3)' }}>
+                <div style={{ background: '#1a2e5a', padding: '24px 28px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <h2 style={{ color: 'white', fontWeight: '800', margin: '0 0 4px', fontSize: '1.2rem' }}>Verify Identity</h2>
+                      <p style={{ color: '#94a3b8', margin: 0, fontSize: '0.85rem' }}>Confirm your credentials to place the order</p>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.1)', borderRadius: '50%', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#f5c518', fontWeight: '800', fontSize: '0.9rem' }}>
+                      2/2
+                    </div>
+                  </div>
+                </div>
 
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontWeight: '600', color: '#374151', fontSize: '0.8rem', marginBottom: '6px' }}>
-                Student ID
-              </label>
-              <input
-                placeholder="25-0169"
-                value={confirmForm.student_id}
-                onChange={handleVerifyStudentId}
-                maxLength={7}
-                style={{
+                <div style={{ padding: '24px 28px' }}>
+                  {confirmError && (
+                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px', color: '#dc2626', fontSize: '0.8rem' }}>
+                      {confirmError}
+                    </div>
+                  )}
+
+                  <p style={{ color: '#374151', fontSize: '0.875rem', marginBottom: '20px', lineHeight: '1.5' }}>
+                    For your security, please re-enter your login credentials to confirm this order.
+                  </p>
+
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontWeight: '600', color: '#374151', fontSize: '0.8rem', marginBottom: '6px' }}>
+                      Student ID
+                    </label>
+                    <input
+                      placeholder="25-0169"
+                      value={confirmForm.student_id}
+                      onChange={handleVerifyStudentId}
+                      maxLength={7}
+                      style={{
                         width: '100%', padding: '12px 14px', borderRadius: '10px',
                         border: '1.5px solid #e5e7eb', fontSize: '1rem', outline: 'none',
                         boxSizing: 'border-box', fontFamily: 'monospace', letterSpacing: '2px',
-                }}
-                onFocus={e => e.target.style.borderColor = '#1a2e5a'}
-                onBlur={e => e.target.style.borderColor = '#e5e7eb'}
-              />
-              <p style={{ color: '#9ca3af', fontSize: '0.72rem', marginTop: '3px' }}>
-                Format: YY-NNNN (e.g. 25-0169)
-              </p>
-            </div>
+                      }}
+                      onFocus={e => e.target.style.borderColor = '#1a2e5a'}
+                      onBlur={e => e.target.style.borderColor = '#e5e7eb'}
+                    />
+                    <p style={{ color: '#9ca3af', fontSize: '0.72rem', marginTop: '3px' }}>
+                      Format: YY-NNNN (e.g. 25-0169)
+                    </p>
+                  </div>
 
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', fontWeight: '600', color: '#374151', fontSize: '0.8rem', marginBottom: '6px' }}>Password</label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
-                  value={confirmForm.password}
-                  onChange={e => setConfirmForm({ ...confirmForm, password: e.target.value })}
-                  style={{ width: '100%', padding: '12px 44px 12px 14px', borderRadius: '10px', border: '1.5px solid #e5e7eb', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box' }}
-                  onFocus={e => e.target.style.borderColor = '#1a2e5a'}
-                  onBlur={e => e.target.style.borderColor = '#e5e7eb'}
-                  onKeyDown={e => e.key === 'Enter' && handleConfirmOrder()}
-                />
-                <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+                  <div style={{ marginBottom: '24px' }}>
+                    <label style={{ display: 'block', fontWeight: '600', color: '#374151', fontSize: '0.8rem', marginBottom: '6px' }}>Password</label>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Enter your password"
+                        value={confirmForm.password}
+                        onChange={e => setConfirmForm({ ...confirmForm, password: e.target.value })}
+                        style={{ width: '100%', padding: '12px 44px 12px 14px', borderRadius: '10px', border: '1.5px solid #e5e7eb', fontSize: '0.95rem', outline: 'none', boxSizing: 'border-box' }}
+                        onFocus={e => e.target.style.borderColor = '#1a2e5a'}
+                        onBlur={e => e.target.style.borderColor = '#e5e7eb'}
+                        onKeyDown={e => e.key === 'Enter' && handleConfirmOrder()}
+                      />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)}
+                        style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button onClick={() => setModalStep(1)}
+                      style={{ flex: 1, padding: '12px', border: '1.5px solid #e5e7eb', borderRadius: '10px', background: 'white', cursor: 'pointer', fontWeight: '600', color: '#64748b' }}>
+                      Back
+                    </button>
+                    <button onClick={handleConfirmOrder}
+                      disabled={confirmLoading || !confirmForm.student_id || !confirmForm.password}
+                      style={{
+                        flex: 2, padding: '12px',
+                        background: confirmLoading || !confirmForm.student_id || !confirmForm.password ? '#9ca3af' : '#1a2e5a',
+                        color: 'white', border: 'none', borderRadius: '10px',
+                        cursor: confirmLoading ? 'not-allowed' : 'pointer',
+                        fontWeight: '700', fontSize: '0.95rem',
+                      }}>
+                      {confirmLoading ? 'Verifying...' : 'Confirm & Place Order'}
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button onClick={() => setModalStep(1)}
-                style={{ flex: 1, padding: '12px', border: '1.5px solid #e5e7eb', borderRadius: '10px', background: 'white', cursor: 'pointer', fontWeight: '600', color: '#64748b' }}>
-                Back
-              </button>
-              <button onClick={handleConfirmOrder}
-                disabled={confirmLoading || !confirmForm.student_id || !confirmForm.password}
-                style={{
-                  flex: 2, padding: '12px',
-                  background: confirmLoading || !confirmForm.student_id || !confirmForm.password ? '#9ca3af' : '#1a2e5a',
-                  color: 'white', border: 'none', borderRadius: '10px',
-                  cursor: confirmLoading ? 'not-allowed' : 'pointer',
-                  fontWeight: '700', fontSize: '0.95rem',
-                }}>
-                {confirmLoading ? 'Verifying...' : 'Confirm & Place Order'}
-              </button>
-            </div>
+            )}
           </div>
-        </div>
+        </>
       )}
-    </div>
-  </>
-)}
-        <Toast
-          visible={toast.visible}
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast({ ...toast, visible: false })}
-        />
+
+      {/* Toast Notification */}
+      <Toast
+        visible={toast.visible}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ ...toast, visible: false })}
+      />
+
       <Footer />
     </div>
   );
