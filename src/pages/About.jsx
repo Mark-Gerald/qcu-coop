@@ -104,44 +104,6 @@ export default function About() {
           ))}
         </div>
       </section>
-
-      {/* Partners/Logos - NOW PERFECTLY CENTERED */}
-      <section style={{ background: '#f8fafc', padding: '60px 20px' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <h2 style={{ color: '#1a2e5a', fontWeight: '800', fontSize: '1.875rem', textAlign: 'center', marginBottom: '12px' }}>Our Partners</h2>
-          <p style={{ color: '#6b7280', textAlign: 'center', marginBottom: '40px' }}>Trusted by leading organizations</p>
-          
-          {/* FIX: Grid with perfect centering */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {partners.map(partner => (
-              <div key={partner.name} 
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '24px 16px',
-                  background: 'white',
-                  borderRadius: '12px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                  minHeight: '140px',
-                  aspectRatio: '1',
-                }}>
-                <img 
-                  src={partner.image} 
-                  alt={partner.name}
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: '100%',
-                    objectFit: 'contain',
-                  }}
-                  onError={e => { e.target.style.display = 'none'; }}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <Footer />
     </div>
   );
